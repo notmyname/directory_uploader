@@ -24,7 +24,7 @@ def local_dir_contents_to_swift_obj_name_iter(local_dir_path,
             yield local_name, obj_name
 
 
-def main(target_container, source_dir_path):
+def main(target_container, source_dir_path, do_it=True):
     cf_connection = swiftclient.Connection(
         authurl='https://auth.api.rackspacecloud.com/v1.0',
         user=cf_auth.username,
@@ -55,6 +55,9 @@ def main(target_container, source_dir_path):
 
     for i, (local_file, obj_name) in enumerate(missing_in_remote):
         sys.stdout.write('Uploading %s... ' % local_file)
+        if not do_it:
+            print obj_name
+            continue
         sys.stdout.flush()
         with open(local_file) as f:
             # upload the object using a smaller default chunk_size
@@ -78,4 +81,4 @@ if __name__ == '__main__':
             sys.argv[0]
         sys.exit(1)
     else:
-        main(target_container, source_dir_path)
+        main(target_container, source_dir_path, do_it=('-n' not in sys.argv))
