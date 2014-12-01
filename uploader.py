@@ -8,16 +8,17 @@ import cf_auth
 def local_dir_contents_to_swift_obj_name_iter(local_dir_path,
                                               filter_set=None,
                                               space_mapping='_'):
-    len_prefix = len(local_dir_path)
     if not local_dir_path.endswith('/'):
-        len_prefix += 1
+        local_dir_path += '/'
+    len_prefix = len(local_dir_path)  # +1 for the slash
     if filter_set is None:
         filter_set = set()
     for dirpath, dirnames, filenames in os.walk(local_dir_path):
         for filename in filenames:
             if filename in filter_set:
                 continue
-            local_name = '%s/%s' % (dirpath, filename)
+            slash = '' if dirpath.endswith('/') else '/'
+            local_name = '%s%s%s' % (dirpath, slash, filename)
             obj_name = local_name[len_prefix:]
             if space_mapping is not None:
                 obj_name = obj_name.replace(' ', space_mapping)
@@ -77,7 +78,8 @@ if __name__ == '__main__':
         source_dir_path = sys.argv[2]
         target_container = sys.argv[1]
     except IndexError:
-        print >>sys.stderr, 'Usage: %s target_container path/to/source/dir' % \
+        print >>sys.stderr, \
+            'Usage: %s target_container path/to/source/dir [-n]' % \
             sys.argv[0]
         sys.exit(1)
     else:
